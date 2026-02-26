@@ -18,6 +18,24 @@ export const TRADING_SESSIONS = [
         region: 'Asia'
     },
     {
+        id: 'singapore',
+        name: 'Singapore',
+        open: 1,
+        close: 10,
+        color: '#ec4899', // Pink
+        currencyPairs: ['USD/SGD', 'USD/JPY', 'AUD/JPY'],
+        region: 'Asia'
+    },
+    {
+        id: 'frankfurt',
+        name: 'Frankfurt',
+        open: 7,
+        close: 16,
+        color: '#6366f1', // Indigo
+        currencyPairs: ['EUR/USD', 'EUR/GBP', 'EUR/JPY'],
+        region: 'Europe'
+    },
+    {
         id: 'london',
         name: 'London',
         open: 8,
