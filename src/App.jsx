@@ -93,7 +93,7 @@ const Dashboard = () => {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">
-                STATION CLOCK
+                SESSION CLOCK
               </h1>
               <p className="text-zinc-500 font-medium flex items-center gap-2 text-sm">
                 <Globe className="w-3 h-3 text-trading-newyork" />
@@ -148,7 +148,7 @@ const Dashboard = () => {
             </div>
 
             {/* Active Sessions with Countdowns & Progress */}
-            <div className="glass-card p-6 rounded-[2rem]">
+            <div className="glass-card p-8 rounded-[2rem] overflow-hidden">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Live Session Flow</h3>
                 <Activity className="w-4 h-4 text-zinc-600" />
@@ -192,7 +192,7 @@ const Dashboard = () => {
             </div>
 
             {/* Economic News Feed (Bloomberg Style) */}
-            <div className="glass-card p-6 rounded-[2rem] border-red-500/10 bg-red-500/[0.02]">
+            <div className="glass-card p-8 rounded-[2rem] overflow-hidden border-red-500/10 bg-red-500/[0.02]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" />
@@ -233,7 +233,7 @@ const Dashboard = () => {
 
           {/* Right Panel: Terminal Data & Legend */}
           <div className="lg:col-span-3 space-y-6 order-3">
-            <div className="glass-card p-6 rounded-[2rem]">
+            <div className="glass-card p-8 rounded-[2rem] overflow-hidden">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 flex items-center gap-2">
                 <Timer className="w-3 h-3" />
                 Session Queue
@@ -279,7 +279,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="glass-card p-6 rounded-[2rem] space-y-4 border-trading-newyork/10">
+            <div className="glass-card p-8 rounded-[2rem] overflow-hidden space-y-4 border-trading-newyork/10">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 leading-tight">Liquidity Intelligence</h3>
               <div className="p-4 bg-trading-newyork/[0.03] rounded-2xl border border-trading-newyork/10 space-y-3">
                 <div className="flex justify-between items-center">

@@ -8,8 +8,8 @@ A professional-grade, high-precision web application designed for forex traders 
 - **Dynamic Hub Visualization**: Visual arcs for major trading hubs:
     - **Sydney** (Cyan)
     - **Tokyo** (Purple)
-    - **Singapore** (Pink) - *New*
-    - **Frankfurt** (Indigo) - *New*
+    - **Singapore** (Pink)
+    - **Frankfurt** (Indigo)
     - **London** (Amber)
     - **New York** (Emerald)
 - **Live Terminal Analytics**:
@@ -23,7 +23,7 @@ A professional-grade, high-precision web application designed for forex traders 
 - **Precision Timekeeping**:
     - Custom synchronized Hour, Minute, and Second hands.
     - Seamless toggle between Coordinated Universal Time (UTC) and Local Time zones.
-- **Professional Fintech UI**: High-contrast dark mode with glassmorphism, tailored for 24/7 monitoring.
+- **Professional Fintech UI**: High-contrast dark mode with glassmorphism, tailored for 24/7 monitoring. Corrected corner rendering and optimized internal padding for better data visualization.
 
 ## Trading Session Times (UTC)
 
@@ -59,6 +59,11 @@ A professional-grade, high-precision web application designed for forex traders 
    ```bash
    npm run build
    ```
+
+## Deployment
+
+### Vercel
+The project includes a `vercel.json` file for seamless deployment on Vercel. It ensures that Single Page Application (SPA) routing works correctly by redirecting all requests to `/index.html`.
 
 ## Design Philosophy
 
