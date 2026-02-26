@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TRADING_SESSIONS } from '../data/sessions';
 
 const ClockArc = ({ session, isActive, onHover, radius = 160 }) => {
-    const { open, close, color, name } = session;
+    const { open, close, color } = session;
     const cx = 200;
     const cy = 200;
 
@@ -31,10 +31,10 @@ const ClockArc = ({ session, isActive, onHover, radius = 160 }) => {
             stroke={color}
             strokeWidth={isActive ? 20 : 16}
             strokeLinecap="round"
-            className={`clock-arc opacity-70 hover:opacity-100 transition-all duration-300 ${isActive ? 'animate-pulse-active opacity-100' : ''}`}
+            className={`clock-arc transition-all duration-300 ${isActive ? 'animate-pulse-active' : ''}`}
             onMouseEnter={() => onHover(session)}
             onMouseLeave={() => onHover(null)}
-            style={{ strokeDasharray: isActive ? 'none' : 'none' }}
+            style={{ cursor: 'pointer', pointerEvents: 'visibleStroke' }}
         />
     );
 };
@@ -43,12 +43,13 @@ export const Clock = ({ utcTime, activeSessions, hoveredSession, setHoveredSessi
     const cx = 200;
     const cy = 200;
 
+    // 24 Hour Markings & Numbers
     const hourMarkings = Array.from({ length: 24 }).map((_, i) => {
         const angle = (i / 24) * 360 - 90;
         const rad = (angle * Math.PI) / 180;
-        const rOuter = 185;
-        const rInner = 175;
-        const rText = 195;
+        const rOuter = 188;
+        const rInner = 178;
+        const rText = 220;
 
         return {
             x1: cx + rInner * Math.cos(rad),
@@ -61,79 +62,140 @@ export const Clock = ({ utcTime, activeSessions, hoveredSession, setHoveredSessi
         };
     });
 
-    const hourHandAngle = (utcTime.totalHours / 24) * 360 - 90;
-    const rad = (hourHandAngle * Math.PI) / 180;
-    const handLength = 140;
-    const handX = cx + handLength * Math.cos(rad);
-    const handY = cy + handLength * Math.sin(rad);
+    // 60 Minute/Second Ticks
+    const minuteTicks = Array.from({ length: 60 }).map((_, i) => {
+        const angle = (i / 60) * 360 - 90;
+        const rad = (angle * Math.PI) / 180;
+        const rOuter = 175;
+        const rInner = 170;
 
-    // Define radius for each session for visual separation
+        return {
+            x1: cx + rInner * Math.cos(rad),
+            y1: cy + rInner * Math.sin(rad),
+            x2: cx + rOuter * Math.cos(rad),
+            y2: cy + rOuter * Math.sin(rad)
+        };
+    });
+
+    // Hand Angle Calculations
+    const hourHandAngle = (utcTime.totalHours / 24) * 360 - 90;
+    const minuteHandAngle = (utcTime.minutes / 60) * 360 - 90;
+    const secondHandAngle = (utcTime.seconds / 60) * 360 - 90;
+
+    const getHandPos = (angle, length) => {
+        const rad = (angle * Math.PI) / 180;
+        return {
+            x: cx + length * Math.cos(rad),
+            y: cy + length * Math.sin(rad)
+        };
+    };
+
+    const hourHand = getHandPos(hourHandAngle, 110);
+    const minuteHand = getHandPos(minuteHandAngle, 150);
+    const secondHand = getHandPos(secondHandAngle, 165);
+
     const sessionRadii = {
-        sydney: 164,
-        tokyo: 154,
-        london: 164,
-        newyork: 154
+        sydney: 156,
+        tokyo: 144,
+        london: 156,
+        newyork: 144
     };
 
     return (
-        <div className="relative w-full aspect-square max-w-[500px] mx-auto">
-            <svg viewBox="0 0 400 400" className="w-full h-full drop-shadow-2xl">
-                {/* Background circle */}
-                <circle cx={cx} cy={cy} r="180" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
+        <div className="relative w-full aspect-square max-w-[550px] mx-auto scale-90 md:scale-100" style={{ isolation: 'isolate' }}>
+            <svg viewBox="0 0 460 460" className="w-full h-full drop-shadow-2xl overflow-visible" style={{ pointerEvents: 'none' }}>
+                <g transform="translate(30, 30)">
+                    {/* Background circle */}
+                    <circle cx={cx} cy={cy} r="180" fill="#18181b" stroke="#3f3f46" strokeWidth="1" style={{ pointerEvents: 'none' }} />
 
-                {/* Hour Markings */}
-                {hourMarkings.map((m, i) => (
-                    <g key={i}>
+                    {/* Minute Ticks */}
+                    {minuteTicks.map((m, i) => (
                         <line
+                            key={`m-${i}`}
                             x1={m.x1} y1={m.y1} x2={m.x2} y2={m.y2}
-                            stroke={i % 6 === 0 ? "#71717a" : "#3f3f46"}
-                            strokeWidth={i % 6 === 0 ? 2 : 1}
+                            stroke={i % 5 === 0 ? "#52525b" : "#27272a"}
+                            strokeWidth={i % 5 === 0 ? 1.5 : 0.5}
+                            style={{ pointerEvents: 'none' }}
                         />
-                        {i % 3 === 0 && (
+                    ))}
+
+                    {/* Hour Markings & Numbers */}
+                    {hourMarkings.map((m, i) => (
+                        <g key={`h-${i}`} style={{ pointerEvents: 'none' }}>
+                            <line
+                                x1={m.x1} y1={m.y1} x2={m.x2} y2={m.y2}
+                                stroke={i % 6 === 0 ? "#71717a" : "#3f3f46"}
+                                strokeWidth={i % 6 === 0 ? 2 : 1}
+                            />
                             <text
                                 x={m.tx} y={m.ty}
-                                fill="#a1a1aa"
-                                fontSize="12"
+                                fill={i % 6 === 0 ? "#e4e4e7" : "#71717a"}
+                                fontSize={i % 6 === 0 ? "14" : "11"}
+                                fontWeight={i % 6 === 0 ? "bold" : "normal"}
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                className="font-medium"
+                                className="font-mono transition-colors duration-300"
                             >
                                 {m.label}
                             </text>
-                        )}
-                    </g>
-                ))}
+                        </g>
+                    ))}
 
-                {/* London-NY Overlap Highlight (Static Background) */}
-                <ClockArc
-                    radius={159}
-                    session={{ open: 13, close: 17, color: 'rgba(255,165,0,0.05)', name: 'Volatility Core' }}
-                    isActive={false}
-                    onHover={() => { }}
-                />
-
-                {/* Session Arcs */}
-                {TRADING_SESSIONS.map(session => (
+                    {/* Overlap Highlight */}
                     <ClockArc
-                        key={session.id}
-                        session={session}
-                        radius={sessionRadii[session.id] || 160}
-                        isActive={activeSessions.some(s => s.id === session.id)}
-                        onHover={setHoveredSession}
+                        radius={150}
+                        session={{ open: 13, close: 17, color: 'rgba(255,165,0,0.05)' }}
+                        isActive={false}
+                        onHover={() => { }}
                     />
-                ))}
 
-                {/* Smooth Hand */}
-                <g className="transition-transform duration-1000 ease-linear">
-                    <line
-                        x1={cx} y1={cy} x2={handX} y2={handY}
-                        stroke="white"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        className="drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-                    />
-                    <circle cx={cx} cy={cy} r="6" fill="white" />
-                    <circle cx={cx} cy={cy} r="2" fill="#18181b" />
+                    {/* Session Arcs */}
+                    {TRADING_SESSIONS.map(session => (
+                        <ClockArc
+                            key={session.id}
+                            session={session}
+                            radius={sessionRadii[session.id] || 160}
+                            isActive={activeSessions.some(s => s.id === session.id)}
+                            onHover={setHoveredSession}
+                        />
+                    ))}
+
+                    {/* Hands - with pointer-events-none to let hover pass through to arcs */}
+                    <g style={{ pointerEvents: 'none' }}>
+                        {/* Minute Hand */}
+                        <line
+                            x1={cx} y1={cy} x2={minuteHand.x} y2={minuteHand.y}
+                            stroke="#a1a1aa"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            className="drop-shadow-[0_0_4px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out"
+                        />
+
+                        {/* Hour Hand */}
+                        <line
+                            x1={cx} y1={cy} x2={hourHand.x} y2={hourHand.y}
+                            stroke="white"
+                            strokeWidth="5"
+                            strokeLinecap="round"
+                            className="drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+                        />
+
+                        {/* Second Hand */}
+                        <g className="transition-all duration-300 ease-in-out">
+                            <line
+                                x1={cx} y1={cy} x2={secondHand.x} y2={secondHand.y}
+                                stroke="#10b981"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+                            />
+                            <circle cx={cx} cy={cy} r="3" fill="#10b981" />
+                        </g>
+
+                        {/* Center Cap */}
+                        <circle cx={cx} cy={cy} r="6" fill="white" />
+                        <circle cx={cx} cy={cy} r="2" fill="#18181b" />
+                    </g>
                 </g>
             </svg>
 
@@ -142,10 +204,11 @@ export const Clock = ({ utcTime, activeSessions, hoveredSession, setHoveredSessi
                 <div
                     className="absolute z-50 glass-card p-4 rounded-2xl w-64 pointer-events-none transition-all duration-200"
                     style={{
-                        top: '50%',
+                        top: '50.5%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        border: `1px solid ${hoveredSession.color}44`
+                        border: `1px solid ${hoveredSession.color}44`,
+                        pointerEvents: 'none'
                     }}
                 >
                     <div className="flex items-center gap-2 mb-2">

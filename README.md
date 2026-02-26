@@ -1,16 +1,56 @@
-# React + Vite
+# Global Trading Session Clock
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A professional, high-precision web application for tracking global forex trading sessions in real-time. This tool provides a visual representation of market activity across the four major sessions: Sydney, Tokyo, London, and New York.
 
-Currently, two official plugins are available:
+## Core Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 24-Hour Circular Clock: A custom SVG analog-style dial representing a full day cycle.
+- Dynamic Session Arcs: Visual representation of trading hours with distinct colors and radius separation for clarity.
+- Interactive Tooltips: Real-time information on session hours and major currency pairs traded.
+- Market Volatility Indicator: Specialized highlighting for the high-liquidity London-New York overlap.
+- Multi-Timezone Support: Toggle between Coordinated Universal Time (UTC) and Local Time.
+- Responsive Design: Optimized for both desktop dashboards and mobile devices.
+- Modern Fintech UI: Dark theme with glassmorphism effects and smooth animations.
 
-## React Compiler
+## Trading Session Times (UTC)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Sydney: 22:00 - 07:00
+- Tokyo: 00:00 - 09:00
+- London: 08:00 - 17:00
+- New York: 13:00 - 22:00
 
-## Expanding the ESLint configuration
+## Technical Requirements
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React (JSX)
+- Tailwind CSS
+- Lucide React Icons
+- SVG-based rendering
+- No external UI frameworks
+
+## Development
+
+### Prerequisites
+
+- Node.js (Latest LTS recommended)
+- npm or yarn
+
+### Installation
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## Design Philosophy
+
+The application is built with a minimal, data-focused approach. It prioritizes clarity and visual hierarchy to help traders quickly identify market overlaps and current session status at a glance.

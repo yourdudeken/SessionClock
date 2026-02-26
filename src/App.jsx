@@ -102,7 +102,12 @@ const Dashboard = () => {
               <div className="space-y-4">
                 {activeSessions.length > 0 ? (
                   activeSessions.map(session => (
-                    <div key={session.id} className="flex items-center justify-between group">
+                    <div
+                      key={session.id}
+                      className={`flex items-center justify-between group cursor-pointer transition-all duration-300 p-2 rounded-xl ${hoveredSession?.id === session.id ? 'bg-white/5' : ''}`}
+                      onMouseEnter={() => setHoveredSession(session)}
+                      onMouseLeave={() => setHoveredSession(null)}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-8 rounded-full" style={{ backgroundColor: session.color }}></div>
                         <div>
@@ -156,7 +161,12 @@ const Dashboard = () => {
               </h3>
               <div className="space-y-6">
                 {TRADING_SESSIONS.map(s => (
-                  <div key={s.id} className="space-y-2">
+                  <div
+                    key={s.id}
+                    className={`space-y-2 cursor-pointer transition-all duration-300 p-2 rounded-xl ${hoveredSession?.id === s.id ? 'bg-white/5' : ''}`}
+                    onMouseEnter={() => setHoveredSession(s)}
+                    onMouseLeave={() => setHoveredSession(null)}
+                  >
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-bold text-zinc-300" style={{ color: s.color }}>{s.name}</span>
                       <span className="text-[10px] font-mono text-zinc-500">{s.open}:00 - {s.close}:00</span>
