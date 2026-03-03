@@ -5,7 +5,7 @@ import { TRADING_SESSIONS, VOLATILITY_OVERLAP } from './data/sessions';
 import { Globe, Clock as ClockIcon, Activity, MapPin, Info, ArrowUpRight, AlertCircle, Timer, TrendingUp } from 'lucide-react';
 
 const Dashboard = () => {
-  const { getUTCTime, getLocalTime } = useTime();
+  const { getUTCTime, getLocalTime, time } = useTime();
   const [isLocalMode, setIsLocalMode] = useState(false);
   const [hoveredSession, setHoveredSession] = useState(null);
   const [liveNews, setLiveNews] = useState([]);
@@ -62,10 +62,12 @@ const Dashboard = () => {
   }, []);
 
   const isWeekend = useMemo(() => {
-    const { day, totalHours } = utcTime;
-    // Market closes Friday 22:00 UTC and opens Sunday 22:00 UTC
-    return (day === 5 && totalHours >= 22) || day === 6 || (day === 0 && totalHours < 22);
-  }, [utcTime.day, utcTime.totalHours]);
+    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(time);
+    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(time), 10);
+
+    // Market closes Friday 17:00 NY time and opens Sunday 17:00 NY time
+    return (nyWeekdayStr === 'Fri' && nyHour >= 17) || nyWeekdayStr === 'Sat' || (nyWeekdayStr === 'Sun' && nyHour < 17);
+  }, [time]);
 
   const activeSessions = useMemo(() => {
     if (isWeekend) return [];
@@ -92,13 +94,18 @@ const Dashboard = () => {
 
     return TRADING_SESSIONS.reduce((acc, s) => {
       if (isWeekend) {
+        const nyWeekdayStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(time);
+        const nyHourStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(time);
+        const nyMinuteStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', minute: 'numeric' }).format(time);
+        const currentNyTotalHours = parseInt(nyHourStr, 10) + parseInt(nyMinuteStr, 10) / 60 + time.getSeconds() / 3600;
+
         let hoursUntilOpen;
-        if (utcTime.day === 5) {
-          hoursUntilOpen = 24 - currentHour + 24 + 22; // Rest of Friday + Saturday + Sunday until 22:00
-        } else if (utcTime.day === 6) {
-          hoursUntilOpen = 24 - currentHour + 22; // Rest of Saturday + Sunday until 22:00
+        if (nyWeekdayStr === 'Fri') {
+          hoursUntilOpen = 24 - currentNyTotalHours + 24 + 17; // Rest of Friday + Saturday + Sunday until 17:00 NY
+        } else if (nyWeekdayStr === 'Sat') {
+          hoursUntilOpen = 24 - currentNyTotalHours + 17; // Rest of Saturday + Sunday until 17:00 NY
         } else {
-          hoursUntilOpen = 22 - currentHour; // Rest of Sunday until 22:00
+          hoursUntilOpen = 17 - currentNyTotalHours; // Rest of Sunday until 17:00 NY
         }
 
         acc[s.id] = {
@@ -143,7 +150,7 @@ const Dashboard = () => {
       }
       return acc;
     }, {});
-  }, [utcTime.day, utcTime.totalHours, activeSessions, isWeekend]);
+  }, [utcTime.day, utcTime.totalHours, activeSessions, isWeekend, time]);
 
   const displayTime = isLocalMode ? localTime : utcTime;
 
