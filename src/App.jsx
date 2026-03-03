@@ -61,7 +61,15 @@ const Dashboard = () => {
     return () => clearInterval(ratesInterval);
   }, []);
 
+  const isWeekend = useMemo(() => {
+    const { day, totalHours } = utcTime;
+    // Market closes Friday 22:00 UTC and opens Sunday 22:00 UTC
+    return (day === 5 && totalHours >= 22) || day === 6 || (day === 0 && totalHours < 22);
+  }, [utcTime.day, utcTime.totalHours]);
+
   const activeSessions = useMemo(() => {
+    if (isWeekend) return [];
+
     const hour = utcTime.totalHours;
     return TRADING_SESSIONS.filter(s => {
       if (s.close > s.open) {
@@ -70,17 +78,38 @@ const Dashboard = () => {
         return hour >= s.open || hour < s.close;
       }
     });
-  }, [utcTime.totalHours]);
+  }, [utcTime.totalHours, isWeekend]);
 
   const isVolatile = useMemo(() => {
+    if (isWeekend) return false;
+
     const hour = utcTime.totalHours;
     return hour >= VOLATILITY_OVERLAP.start && hour < VOLATILITY_OVERLAP.end;
-  }, [utcTime.totalHours]);
+  }, [utcTime.totalHours, isWeekend]);
 
   const sessionAnalytics = useMemo(() => {
     const currentHour = utcTime.totalHours;
 
     return TRADING_SESSIONS.reduce((acc, s) => {
+      if (isWeekend) {
+        let hoursUntilOpen;
+        if (utcTime.day === 5) {
+          hoursUntilOpen = 24 - currentHour + 24 + 22; // Rest of Friday + Saturday + Sunday until 22:00
+        } else if (utcTime.day === 6) {
+          hoursUntilOpen = 24 - currentHour + 22; // Rest of Saturday + Sunday until 22:00
+        } else {
+          hoursUntilOpen = 22 - currentHour; // Rest of Sunday until 22:00
+        }
+
+        acc[s.id] = {
+          status: 'WEEKEND',
+          countdown: `${Math.floor(hoursUntilOpen)}h ${Math.floor((hoursUntilOpen % 1) * 60)}m to open`,
+          progress: 0,
+          isPowerHour: false
+        };
+        return acc;
+      }
+
       let progress = 0, isPowerHour = false;
       const isActive = activeSessions.some(as => as.id === s.id);
 
@@ -114,7 +143,7 @@ const Dashboard = () => {
       }
       return acc;
     }, {});
-  }, [utcTime.totalHours, activeSessions]);
+  }, [utcTime.day, utcTime.totalHours, activeSessions, isWeekend]);
 
   const displayTime = isLocalMode ? localTime : utcTime;
 
@@ -188,6 +217,7 @@ const Dashboard = () => {
                   {displayTime.timezone || 'UTC+0'}
                 </p>
                 {isVolatile && <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>}
+                {isWeekend && <span className="text-xs font-black text-red-500 bg-red-500/10 px-2 py-1 rounded-md animate-pulse">MARKETS CLOSED</span>}
               </div>
             </div>
 
@@ -218,6 +248,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+                {isWeekend && <p className="text-red-500 text-xs italic font-bold">Trading is paused for the weekend. See you Sunday 22:00 UTC.</p>}
+                {!isWeekend && activeSessions.length === 0 && <p className="text-zinc-600 text-xs italic">Global markets in dormant state.</p>}
               </div>
             </div>
 
@@ -271,7 +303,7 @@ const Dashboard = () => {
                       </div>
                       <div className="flex justify-between items-center text-[10px] font-mono">
                         <span className="text-zinc-500">{s.open}:00 - {s.close}:00</span>
-                        <span className={isOpen ? 'text-zinc-200' : 'text-zinc-600'}>{isOpen ? 'END' : 'START'}: {analytics.countdown}</span>
+                        <span className={isOpen ? 'text-zinc-200' : 'text-zinc-600'}>{isOpen ? 'END' : isWeekend ? 'WAIT' : 'START'}: {analytics.countdown}</span>
                       </div>
                     </div>
                   );
@@ -291,17 +323,17 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {(activeSessions[0]?.currencyPairs || ['EUR/USD', 'GBP/USD', 'USD/JPY']).map(pair => (
+                  {(isWeekend ? ['USD/JPY', 'EUR/USD', 'GBP/USD'] : activeSessions[0]?.currencyPairs || ['EUR/USD', 'GBP/USD', 'USD/JPY']).map(pair => (
                     <div key={pair} className="flex justify-between items-center">
                       <span className="text-[10px] font-black text-zinc-300">{pair}</span>
                       <span className="text-xs font-mono font-bold text-trading-newyork tabular-nums">
-                        {getPairPrice(pair)}
+                        {isWeekend ? 'CLOSED' : getPairPrice(pair)}
                       </span>
                     </div>
                   ))}
                 </div>
                 <p className="text-[9px] text-zinc-600 leading-snug border-t border-white/5 pt-3">
-                  Streaming {activeSessions[0]?.name || 'Global'} liquidity via real-time market data nodes.
+                  {isWeekend ? 'Weekend prices are frozen at Friday close.' : `Streaming ${activeSessions[0]?.name || 'Global'} liquidity via real-time market data nodes.`}
                 </p>
               </div>
             </div>
