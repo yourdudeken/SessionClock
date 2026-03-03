@@ -16,7 +16,8 @@ export function useTime() {
             hours: time.getUTCHours(),
             minutes: time.getUTCMinutes(),
             seconds: time.getUTCSeconds(),
-            totalHours: time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600
+            totalHours: time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600,
+            day: time.getUTCDay()
         };
     };
 
@@ -26,7 +27,8 @@ export function useTime() {
             minutes: time.getMinutes(),
             seconds: time.getSeconds(),
             totalHours: time.getHours() + time.getMinutes() / 60 + time.getSeconds() / 3600,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            day: time.getDay()
         };
     };
 
