@@ -4,6 +4,19 @@ import { useTime } from './hooks/useTime';
 import { TRADING_SESSIONS, VOLATILITY_OVERLAP } from './data/sessions';
 import { Globe, Clock as ClockIcon, Activity, MapPin, Info, ArrowUpRight, AlertCircle, Timer, TrendingUp } from 'lucide-react';
 
+const nyWeekdayFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' });
+const nyHourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' });
+const nyMinuteFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', minute: 'numeric' });
+
+const computeMarketOpenUtc = (time) => {
+  const nyH = parseInt(nyHourFormatter.format(time), 10);
+  const utcH = time.getUTCHours();
+  let diff = utcH - nyH;
+  if (diff < 0) diff += 24;
+  const openUtcHour = (17 + diff) % 24;
+  return `${openUtcHour.toString().padStart(2, '0')}:00 UTC`;
+};
+
 const Dashboard = () => {
   const { getUTCTime, getLocalTime, time } = useTime();
   const [isLocalMode, setIsLocalMode] = useState(false);
@@ -61,12 +74,15 @@ const Dashboard = () => {
     return () => clearInterval(ratesInterval);
   }, []);
 
-  const isWeekend = useMemo(() => {
-    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(time);
-    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(time), 10);
+  const { isWeekend, currentNyTotalHours, nyWeekdayStr } = useMemo(() => {
+    const nyWeekdayStr = nyWeekdayFormatter.format(time);
+    const nyHour = parseInt(nyHourFormatter.format(time), 10);
+    const nyMinute = parseInt(nyMinuteFormatter.format(time), 10);
+    const currentNyTotalHours = nyHour + nyMinute / 60 + time.getUTCSeconds() / 3600;
 
     // Market closes Friday 17:00 NY time and opens Sunday 17:00 NY time
-    return (nyWeekdayStr === 'Fri' && nyHour >= 17) || nyWeekdayStr === 'Sat' || (nyWeekdayStr === 'Sun' && nyHour < 17);
+    const isWeekend = (nyWeekdayStr === 'Fri' && nyHour >= 17) || nyWeekdayStr === 'Sat' || (nyWeekdayStr === 'Sun' && nyHour < 17);
+    return { isWeekend, currentNyTotalHours, nyWeekdayStr };
   }, [time]);
 
   const activeSessions = useMemo(() => {
@@ -94,10 +110,6 @@ const Dashboard = () => {
 
     return TRADING_SESSIONS.reduce((acc, s) => {
       if (isWeekend) {
-        const nyWeekdayStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' }).format(time);
-        const nyHourStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(time);
-        const nyMinuteStr = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', minute: 'numeric' }).format(time);
-        const currentNyTotalHours = parseInt(nyHourStr, 10) + parseInt(nyMinuteStr, 10) / 60 + time.getSeconds() / 3600;
 
         let hoursUntilOpen;
         if (nyWeekdayStr === 'Fri') {
@@ -150,7 +162,7 @@ const Dashboard = () => {
       }
       return acc;
     }, {});
-  }, [utcTime.day, utcTime.totalHours, activeSessions, isWeekend, time]);
+  }, [utcTime.totalHours, activeSessions, isWeekend, currentNyTotalHours, nyWeekdayStr]);
 
   const displayTime = isLocalMode ? localTime : utcTime;
 
@@ -255,7 +267,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
-                {isWeekend && <p className="text-red-500 text-xs italic font-bold">Trading is paused for the weekend. See you Sunday 22:00 UTC.</p>}
+                {isWeekend && <p className="text-red-500 text-xs italic font-bold">Trading is paused for the weekend. See you Sunday {computeMarketOpenUtc(time)}.</p>}
                 {!isWeekend && activeSessions.length === 0 && <p className="text-zinc-600 text-xs italic">Global markets in dormant state.</p>}
               </div>
             </div>
