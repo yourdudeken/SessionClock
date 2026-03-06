@@ -359,6 +359,16 @@ const Dashboard = () => {
           </div>
         </main>
 
+        {/* Live FX Option Pricing Widget */}
+        <section className="glass-card p-4 md:p-8 rounded-[2rem] overflow-hidden border-white/5 flex flex-col items-center">
+          <h3 className="text-sm md:text-base font-black uppercase tracking-[0.2em] text-zinc-300 mb-6 text-center">
+            Live FX Option Pricing Widget
+          </h3>
+          <div className="w-full max-w-[850px] mx-auto flex justify-center rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+            <iframe width="100%" height="710px" scrolling="no" src="//widget2.sentryd.com/widget/#/a993c90e-ff7c-4e8e-b4ed-76dca7e1d04c" className="border-0" style={{ minWidth: '850px' }}></iframe>
+          </div>
+        </section>
+
         <footer className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-zinc-600 text-[9px] font-black uppercase tracking-[0.4em]">
           <p>© 2026 GLOBAL TRADING SYSTEMS | LAYER 1 TERMINAL</p>
           <div className="flex gap-8">
